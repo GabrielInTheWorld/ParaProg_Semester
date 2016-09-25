@@ -81,7 +81,7 @@ public class Process extends NodeAbstract {
 					System.out.println(this.toString() + " waiting() " + isSuspending());
 					wait();
 				}
-				System.out.println(this.toString() + ": is not waiting anymore");
+				System.out.println(this.toString() + ": is not waiting anymore Yeah");
 				for (Node node : noteNodes) {
 					node.echo(this, null);
 				}
