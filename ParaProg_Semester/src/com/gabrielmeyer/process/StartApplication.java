@@ -98,8 +98,8 @@ public class StartApplication {
 			processors[i] = new Process(String.valueOf(i), false, startLatch);
 		}
 		processors[count / 2] = new Process(String.valueOf(count / 2), true, startLatch);
-		Thread t = new Thread(processors[count / 2]);
-		t.start();
+		// Thread t = new Thread(processors[count / 2]);
+		processors[count / 2].start();
 		processors[count / 2].setupNeighbours(processors[count / 2 - 2], processors[count / 2 + 2]);
 		processors[count / 4].setupNeighbours(processors[count / 2 - 1], processors[count / 2 - 3]);
 		processors[count / 2 + 2].setupNeighbours(processors[count / 2 + 1], processors[count / 2 + 3]);
@@ -110,6 +110,20 @@ public class StartApplication {
 
 		for (int i = 1; i < count; ++i) {
 			processors[i] = new Process(String.valueOf(i), false, startLatch);
+		}
+
+		processors[0].start();
+
+		for (int i = 0; i < count; ++i) {
+			int iNumberOfNeighbours = (int) (Math.random() * count);
+			if (iNumberOfNeighbours > 0) {
+				for (int j = 0; j < iNumberOfNeighbours; ++j) {
+					int iNeighbour = (int) (Math.random() * count);
+					processors[i].setupNeighbours(processors[iNeighbour]);
+				}
+			} else {
+				processors[i].setupNeighbours();
+			}
 		}
 	}
 
