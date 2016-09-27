@@ -7,27 +7,55 @@ public class StartApplication {
 	CountDownLatch startLatch;
 
 	Process[] processors;
+	ProcessElection[] election;
 
-	public StartApplication(String kindOfGraph, int count) {
+	public StartApplication(String algorithm, String kindOfGraph, int count) {
 		processors = new Process[count];
-		startLatch = new CountDownLatch(count / 2);
-		switch (kindOfGraph) {
-		case "C":
-			startCircle(count);
+		election = new ProcessElection[count];
+		startLatch = new CountDownLatch(count);
+		switch (algorithm) {
+
+		case "election":
+			switch (kindOfGraph) {
+			case "C":
+				startCircleElection(count);
+				break;
+			case "K":
+				startFullGraphElection(count);
+				break;
+			case "BT":
+				startBinaryTreeElection(count);
+				break;
+			case "T":
+				startTreeElection(count);
+				break;
+			case "L":
+				startLoopElection(count);
+				break;
+			default:
+				break;
+			}
 			break;
-		case "K":
-			startFullGraph(count);
-			break;
-		case "BT":
-			startBinaryTree(count);
-			break;
-		case "T":
-			startTree(count);
-			break;
-		case "L":
-			startLoop(count);
-			break;
-		default:
+		case "echo":
+			switch (kindOfGraph) {
+			case "C":
+				startCircle(count);
+				break;
+			case "K":
+				startFullGraph(count);
+				break;
+			case "BT":
+				startBinaryTree(count);
+				break;
+			case "T":
+				startTree(count);
+				break;
+			case "L":
+				startLoop(count);
+				break;
+			default:
+				break;
+			}
 			break;
 		}
 		// Process[] processors = new Process[count];
@@ -115,19 +143,47 @@ public class StartApplication {
 		processors[0].start();
 
 		for (int i = 0; i < count; ++i) {
-			int iNumberOfNeighbours = (int) (Math.random() * count);
-			if (iNumberOfNeighbours > 0) {
-				for (int j = 0; j < iNumberOfNeighbours; ++j) {
-					int iNeighbour = (int) (Math.random() * count);
-					processors[i].setupNeighbours(processors[iNeighbour]);
-				}
-			} else {
+			if (i + 1 < count)
+				processors[i].setupNeighbours(processors[i + 1]);
+			else
 				processors[i].setupNeighbours();
-			}
 		}
+
+		// for (int i = 0; i < count; ++i) {
+		// System.out.println("i in setupNeighbours: " + i);
+		// int iNumberOfNeighbours = (int) (Math.random() * count);
+		// if (iNumberOfNeighbours > 0) {
+		// for (int j = 0; j < iNumberOfNeighbours; ++j) {
+		// int iNeighbour = (int) (Math.random() * count);
+		// processors[i].setupNeighbours(processors[iNeighbour]);
+		// }
+		// } else {
+		// processors[i].setupNeighbours();
+		// }
+		// }
 	}
 
 	private void startLoop(int count) {
+
+	}
+
+	private void startCircleElection(int count) {
+
+	}
+
+	private void startFullGraphElection(int count) {
+
+	}
+
+	private void startBinaryTreeElection(int count) {
+
+	}
+
+	private void startTreeElection(int count) {
+
+	}
+
+	private void startLoopElection(int count) {
 
 	}
 
@@ -135,7 +191,7 @@ public class StartApplication {
 		for (String a : args) {
 			System.out.println("a: " + a);
 		}
-		new StartApplication(args[0], Integer.valueOf(args[1]));
+		new StartApplication(args[0], args[1], Integer.valueOf(args[2]));
 	}
 
 }
