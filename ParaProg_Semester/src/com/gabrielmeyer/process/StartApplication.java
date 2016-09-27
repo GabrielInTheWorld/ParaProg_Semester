@@ -142,25 +142,32 @@ public class StartApplication {
 
 		processors[0].start();
 
-		for (int i = 0; i < count; ++i) {
-			if (i + 1 < count)
-				processors[i].setupNeighbours(processors[i + 1]);
-			else
-				processors[i].setupNeighbours();
-		}
-
+		/**
+		 * test cycle
+		 */
 		// for (int i = 0; i < count; ++i) {
-		// System.out.println("i in setupNeighbours: " + i);
-		// int iNumberOfNeighbours = (int) (Math.random() * count);
-		// if (iNumberOfNeighbours > 0) {
-		// for (int j = 0; j < iNumberOfNeighbours; ++j) {
-		// int iNeighbour = (int) (Math.random() * count);
-		// processors[i].setupNeighbours(processors[iNeighbour]);
-		// }
-		// } else {
+		// if (i + 1 < count)
+		// processors[i].setupNeighbours(processors[i + 1]);
+		// else
 		// processors[i].setupNeighbours();
 		// }
-		// }
+
+		/**
+		 * right cycle
+		 */
+		for (int i = 0; i < count; ++i) {
+			System.out.println("i in setupNeighbours: " + i);
+			int iNumberOfNeighbours = (int) (Math.random() * count);
+			if (iNumberOfNeighbours > 0) {
+				for (int j = 0; j < iNumberOfNeighbours; ++j) {
+					int iNeighbour = (int) (Math.random() * count);
+					if (i != iNeighbour)
+						processors[i].setupNeighbours(processors[iNeighbour]);
+				}
+			} else {
+				processors[i].setupNeighbours();
+			}
+		}
 	}
 
 	private void startLoop(int count) {
@@ -180,6 +187,22 @@ public class StartApplication {
 	}
 
 	private void startTreeElection(int count) {
+		election[0] = new ProcessElection("0", true, startLatch);
+		election[1] = new ProcessElection("1", true, startLatch);
+		election[2] = new ProcessElection("2", true, startLatch);
+
+		for (int i = 3; i < count; ++i) {
+			election[i] = new ProcessElection(String.valueOf(i), false, startLatch);
+		}
+
+		for (int i = 0; i < 3; ++i) {
+			election[i].setupNeighbours(election[count - 1]);
+			election[i].start();
+		}
+
+		for (int i = 3; i < count; ++i) {
+			election[i].setupNeighbours();
+		}
 
 	}
 
