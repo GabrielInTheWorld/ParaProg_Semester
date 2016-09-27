@@ -15,8 +15,6 @@ public class Process extends NodeAbstract {
 	private boolean running = false, suspending = false;
 	private Set<Node> noteNodes = Collections.synchronizedSet(new HashSet<>());
 	private Set<Node> sendToNodes = Collections.synchronizedSet(new HashSet<>());
-	// private Set<Node> nodesToDelete = Collections.synchronizedSet(new
-	// HashSet<>());
 	private AtomicBoolean countedDown = new AtomicBoolean(false);
 
 	public Process(String name, boolean initiator, CountDownLatch startLatch) {
@@ -40,11 +38,9 @@ public class Process extends NodeAbstract {
 					System.out.println(this.toString() + " neighbours: " + node.toString());
 				}
 				System.out.println(this.toString() + " wakeUp from " + neighbour.toString());
-				// Thread t = new Thread(this);
 				suspending = true;
 				running = true;
 				this.start();
-				// suspending = true;
 			}
 		}
 	}
@@ -52,7 +48,6 @@ public class Process extends NodeAbstract {
 	@Override
 	public void echo(Node neighbour, Object data) {
 		System.out.println(this.toString() + " echo from " + neighbour.toString());
-		// nodesToDelete.add(neighbour);
 		synchronized (sendToNodes) {
 			sendToNodes.remove(neighbour);
 		}
@@ -63,19 +58,6 @@ public class Process extends NodeAbstract {
 		}
 	}
 
-	// private void deleteNodes() {
-	// for (Node node : nodesToDelete) {
-	// noteNodes.remove(node);
-	// }
-	// if (noteNodes.isEmpty()) {
-	// System.out.println("empty noteNodes");
-	// suspending = false;
-	// synchronized (this) {
-	// notify();
-	// }
-	// }
-	// }
-
 	@Override
 	public void run() {
 		System.out.println("initiator?: " + initiator);
@@ -84,11 +66,11 @@ public class Process extends NodeAbstract {
 				System.out.println("before await()");
 				startLatch.await();
 				System.out.println("after await()");
-				System.out.println("amount of neighbours: " + neighbours.size() + ", get call from " + this.getName());
+				System.out.println("amount of neighbours: " + neighbours.size() + ", send call from " + this.getName());
 				for (Node node : neighbours) {
 					System.out.println("neighbour: " + node.toString());
 					node.wakeup(this);
-					noteNodes.add(node);
+					sendToNodes.add(node);
 				}
 				suspending = true;
 			} catch (Exception e) {
@@ -123,11 +105,8 @@ public class Process extends NodeAbstract {
 					for (Iterator<Node> iterator = noteNodes.iterator(); iterator.hasNext();) {
 						Node node = iterator.next();
 						node.echo(this, null);
-						// noteNodes.remove(node);
-						// nodesToDelete.add(node);
 					}
 				}
-				// deleteNodes();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -154,22 +133,16 @@ public class Process extends NodeAbstract {
 
 	@Override
 	public synchronized void setupNeighbours(Node... neighbours) {
-		// for (Node neighbour : neighbours)
-		// System.out.println(this.toString() + " neighbours: " +
-		// neighbour.toString());
-		// TODO improve method
 		for (Node neighbour : neighbours) {
 			System.out.println("setupNeighbour: " + neighbour.toString());
 			this.neighbours.add(neighbour);
 			neighbour.hello(this);
 		}
-		// if (!initiator) {
 
 		if (countedDown.compareAndSet(false, true)) {
 			startLatch.countDown();
 			System.out.println("counted startLatch down: " + startLatch.getCount());
 		}
-		// }
 	}
 
 	private boolean allNeighboursAreWaken() {
